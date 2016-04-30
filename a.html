@@ -9,6 +9,12 @@
     <canvas id="ccc" width="800" height="620"></canvas>
 
     <script type="text/javascript" src="tetris.js"></script>
-    <script type="text/javascript" src="http://localhost:8080/skewer"></script>
+    <!-- <script type="text/javascript" src="http://localhost:8080/skewer"></script> -->
+    <script type="text/javascript">
+        var canvas = document.getElementById('ccc');
+
+        var Tetris = window.tetris;
+        new Tetris.game(canvas);
+    </script>
   </body>
 </html>

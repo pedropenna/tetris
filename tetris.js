@@ -1,74 +1,152 @@
-'use strict';
+(function() {
+  'use strict';
 
-var ccc =    document.getElementById('ccc');
-var ctx =      ccc.getContext('2d');
+  window.tetris = {};
 
-function bar() {
-  console.log('bar');
-  var frameId = requestAnimationFrame(bar);
-  var cor = 'rgb(' + randomShade() + ',' + randomShade() +
-            ',' + randomShade() + ')';
-  console.log('cor', cor);
-  ctx.strokeStyle  = cor;
-  ctx.fillStyle  = cor;
-  //ctx.strokeStyle = 'blue';
-  //ctx.rect(20,20,150,100);
-  ctx.beginPath();
-  ctx.rect(800 * Math.random(),
-           599 * Math.random(),
-           70 * Math.random(),
-           80 * Math.random());
-  ctx.fillRect(799 * Math.random(),
-          599 * Math.random(),
-          70 * Math.random(),
-          80 * Math.random());
-  ctx.stroke();
+  var Game = window.tetris.game = function(canvas) {
+    console.log('new game', canvas);
 
-  //context.arc(context.canvas.width * 0.5, context.canvas.height * 0.5, 10, 0, 2*Math.PI, false);
+    this.canvas = canvas;
+    this.ctx = self.canvas.getContext('2d');
+    console.log('ctx', self.ctx);
 
-}
+    this.initGame();
+  };
 
-function randomShade() {
-  return Math.ceil(254 * Math.random());
-}
+  Game.BLOCK_SIZE = 30;
 
-var blockSize = 30;
+  Game.prototype.drawGrid = function() {
+    // console.log('draw grid');
+    this.ctx.beginPath();
+    this.ctx.strokeStyle  = 'gray';
+    this.ctx.rect(0, 0, this.canvas.width - 1, this.canvas.height - 1);
+    this.ctx.stroke();
+    this.ctx.strokeStyle  = 'rgb(210, 210, 230)';
+    this.ctx.beginPath();
 
-//bar();
-var ccc =    document.getElementById('ccc');
-var ctx =      ccc.getContext('2d');
-ctx.beginPath();
-ctx.strokeStyle  = 'gray';
-ctx.rect(0,0,ccc.width - 1,ccc.height - 1);
-ctx.stroke();
-ctx.strokeStyle  = 'rgb(220, 220, 220)';
-ctx.beginPath();
+    var rightBorderX = (this.ctx.canvas.width / 2) + (10 * Game.BLOCK_SIZE / 2);
+    var leftBorderX = (this.ctx.canvas.width / 2) - (10 * Game.BLOCK_SIZE / 2);
+    var y = 10;
 
-var rightBorderX = (ctx.canvas.width / 2) + (10 * blockSize / 2);
-var leftBorderX = (ctx.canvas.width / 2) - (10 * blockSize / 2);
-var y = 10;
+    for (var x1 = leftBorderX; x1 <= rightBorderX; x1 += Game.BLOCK_SIZE) {
+      this.ctx.moveTo(x1, y);
+      this.ctx.lineTo(x1, y + (20 * Game.BLOCK_SIZE));
+      this.ctx.stroke();
+    }
 
-for (var x1 = leftBorderX; x1 <= rightBorderX; x1 += blockSize) {
-  ctx.moveTo(x1, y);
-  ctx.lineTo(x1, y + (20 * blockSize));
-  ctx.stroke();
-}
+    for (var y1 = y; y1 <= y + (20 * Game.BLOCK_SIZE); y1 += Game.BLOCK_SIZE) {
+      this.ctx.moveTo(leftBorderX, y1);
+      this.ctx.lineTo(rightBorderX, y1);
+      this.ctx.stroke();
+    }
+  };
 
-for (var y1 = y; y1 <= y + (20 * blockSize); y1 += blockSize) {
-  ctx.moveTo(leftBorderX, y1);
-  ctx.lineTo(rightBorderX, y1);
-  ctx.stroke();
-}
-// ctx.rect(leftBorderX, y, 10 * blockSize, (20 * blockSize));
-//   ctx.stroke();
+  Game.prototype.initGame = function() {
+    console.log('init game');
 
-y = 5;
-var cor = 'rgb(' + randomShade() + ',' + randomShade() +
-          ',' + randomShade() + ')';
-console.log('cor', cor);
-ctx.strokeStyle  = cor;
-ctx.fillStyle  = cor;
+    for (var i = 1; i <= 20; i++) {
+      var row = [];
+      for (var j = 1; j <= 10; j++) {
+        row.push(0);
+      }
+      Game.ROWS.push(row);
+    }
 
-ctx.save();
+    Game.ROWS[7][3] = 1;
+    Game.ROWS[7][2] = 1;
+    Game.ROWS[6][3] = 1;
+    Game.ROWS[6][4] = 1;
+    Game.ROWS[0][2] = 2;
+    Game.ROWS[2][0] = 3;
+    Game.ROWS[11][6] = 4;
 
-ctx.restore();
+    this.repaint();
+  };
+
+  Game.ROWS = [];
+
+  Game.prototype.checkIfPieceCollided = function() {
+    // if piece collided
+    //   solidify it
+    //   clear all complete lines
+    //   create an equal ammount of lines on top of the grid
+    //   create new piece
+    //   spawn the new piece
+  };
+
+  Game.prototype.movePiece = function() {
+  };
+
+  Game.FRAME_ID = -1;
+
+  Game.prototype.repaint = function() {
+    // console.log('repaint');
+    Game.FRAME_ID = requestAnimationFrame(this.repaint.bind(this));
+
+    // console.log('Game.FRAME_ID', Game.FRAME_ID);
+
+    var leftBorderX = (this.ctx.canvas.width / 2) - (10 * Game.BLOCK_SIZE / 2);
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.drawGrid();
+
+    for (var i = 0; i < Game.ROWS.length; i++) {
+      var row = Game.ROWS[i];
+      for (var j = 0; j < row.length; j++) {
+
+        var cor;
+        switch (row[j]) {
+          case 1:
+            cor = 'red';
+          break;
+          case 2:
+            cor = 'blue';
+          break;
+          case 3:
+            cor = 'yellow';
+          break;
+          case 4:
+            cor = 'purple';
+          break;
+          default:
+            cor = 'white';
+          break;
+        }
+
+        // this.ctx.beginPath();
+        this.ctx.strokeStyle  = cor;
+        this.ctx.fillStyle  = cor;
+        this.ctx.fillRect(leftBorderX + 1 + (j * Game.BLOCK_SIZE),
+                      10 + 1 + (i * Game.BLOCK_SIZE),
+                      28,
+                      28);
+        // this.ctx.stroke();
+      }
+
+    }
+
+    // var cor = 'rgb(' + Math.ceil(254 * Math.random()) +
+    //         ',' + Math.ceil(254 * Math.random()) +
+    //         ',' + Math.ceil(254 * Math.random()) + ')';
+    // console.log('cor', cor);
+    // this.ctx.strokeStyle  = cor;
+    // this.ctx.fillStyle  = cor;
+    // this.ctx.beginPath();
+    // this.ctx.rect(800 * Math.random(),
+    //          599 * Math.random(),
+    //          70 * Math.random(),
+    //          80 * Math.random());
+    // this.ctx.fillRect(799 * Math.random(),
+    //         599 * Math.random(),
+    //         70 * Math.random(),
+    //         80 * Math.random());
+    // this.ctx.stroke();
+
+  };
+
+  Game.prototype.step = function() {
+    this.checkIfPieceCollided();
+    this.movePiece();
+
+  };
+
+})();
