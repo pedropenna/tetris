@@ -52,6 +52,9 @@
       Game.ROWS.push(row);
     }
 
+    Game.PIECE_SPRITE = [[5, 0],
+                         [5, 5],
+                         [0, 5]];
     Game.ROWS[7][3] = 1;
     Game.ROWS[7][2] = 1;
     Game.ROWS[6][3] = 1;
@@ -61,6 +64,8 @@
     Game.ROWS[11][6] = 4;
 
     this.repaint();
+
+    window.setInterval(this.step.bind(this), 500);
   };
 
   Game.ROWS = [];
@@ -74,7 +79,11 @@
     //   spawn the new piece
   };
 
+  Game.PIECE_SPRITE = [];
+  Game.PIECE_COORDINATES = {x: 4, y: 0};
+
   Game.prototype.movePiece = function() {
+    Game.PIECE_COORDINATES.y++;
   };
 
   Game.FRAME_ID = -1;
@@ -93,8 +102,24 @@
       var row = Game.ROWS[i];
       for (var j = 0; j < row.length; j++) {
 
+        var blockCode = row[j];
+        if (blockCode == 0 &&
+            Game.PIECE_COORDINATES.y >= i &&
+            Game.PIECE_COORDINATES.y <= i + Game.PIECE_SPRITE.length - 1 &&
+            Game.PIECE_COORDINATES.x >= j &&
+            Game.PIECE_COORDINATES.x <= j + Game.PIECE_SPRITE[0].length - 1) {
+
+          var pieceY = Game.PIECE_COORDINATES.y - i;
+          var pieceX = Game.PIECE_COORDINATES.x - j;
+          // console.log('piece X Y ', pieceY, pieceX);
+          var pieceCode = Game.PIECE_SPRITE[pieceY][pieceX];
+          if (pieceCode != 0) {
+            blockCode = pieceCode;
+          }
+        }
+
         var cor;
-        switch (row[j]) {
+        switch (blockCode) {
           case 1:
             cor = 'red';
           break;
@@ -106,6 +131,9 @@
           break;
           case 4:
             cor = 'purple';
+          break;
+          case 5:
+            cor = 'orange';
           break;
           default:
             cor = 'white';
@@ -144,6 +172,8 @@
   };
 
   Game.prototype.step = function() {
+    console.log('step');
+
     this.checkIfPieceCollided();
     this.movePiece();
 
