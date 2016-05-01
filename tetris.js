@@ -59,6 +59,16 @@
     this.spawnNewPiece();
     Game.PIECE_COORDINATES = {x: 4, y: 0};
 
+    Game.ROWS[19][0] = 1;
+    Game.ROWS[19][1] = 1;
+    Game.ROWS[19][2] = 1;
+    Game.ROWS[19][3] = 1;
+    Game.ROWS[19][4] = 1;
+    Game.ROWS[19][5] = 1;
+    Game.ROWS[19][7] = 1;
+    Game.ROWS[19][8] = 1;
+    Game.ROWS[19][9] = 1;
+
     this.repaint();
 
     Game.INTERVAL_ID = window.setInterval(this.step.bind(this), 300);
@@ -134,13 +144,6 @@
 
       this.spawnNewPiece();
     }
-
-    // if piece collided
-    //   solidify it
-    //   clear all complete lines
-    //   create an equal ammount of lines on top of the grid
-    //   create new piece
-    //   spawn the new piece
   };
 
   Game.prototype.spawnNewPiece = function() {
@@ -196,6 +199,31 @@
         }
       }
     }
+
+    this.clearCompleteRows();
+  };
+
+  Game.prototype.clearCompleteRows = function() {
+    var completeRows = [];
+    for (var i = 0; i < Game.ROWS.length; i++) {
+      var row = Game.ROWS[i];
+
+      var complete = true;
+      for (var j = 0; j < row.length; j++) {
+        if (row[j] == 0) {
+          complete = false;
+        }
+      }
+
+      if (complete) {
+        completeRows.push(i);
+      }
+    }
+
+    for (var k = 0; k < completeRows.length; k++) {
+      Game.ROWS.splice(completeRows[k], 1);
+      Game.ROWS.unshift([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    }
   };
 
   Game.prototype.checkCollision = function(x, y, piece) {
@@ -234,8 +262,6 @@
     // console.log('repaint');
     Game.FRAME_ID = requestAnimationFrame(this.repaint.bind(this));
 
-    // console.log('Game.FRAME_ID', Game.FRAME_ID);
-
     var leftBorderX = (this.ctx.canvas.width / 2) - (10 * Game.BLOCK_SIZE / 2);
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.drawGrid();
@@ -253,15 +279,12 @@
 
           var pieceY = Math.abs(Game.PIECE_COORDINATES.y - i);
           var pieceX = Math.abs(j - Game.PIECE_COORDINATES.x);
-          // console.log('i j', i, j);
-          // console.log('piece X Y ', pieceY, pieceX);
+
           var pieceCode = Game.PIECE_SPRITE[pieceY][pieceX];
           if (pieceCode != 0) {
             blockCode = pieceCode;
           }
         }
-
-        // 6, 1 -> [1][2]
 
         var cor;
         switch (blockCode) {
