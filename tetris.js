@@ -52,9 +52,13 @@
       Game.ROWS.push(row);
     }
 
-    Game.PIECE_SPRITE = [[5, 0],
-                         [5, 5],
-                         [0, 5]];
+    // Game.PIECE_SPRITE = [[5, 0],
+    //                      [5, 5],
+    //                      [0, 5]];
+
+    Game.PIECE_SPRITE = [[0, 5, 0],
+                         [5, 5, 5]];
+
     Game.ROWS[7][3] = 1;
     Game.ROWS[7][2] = 1;
     Game.ROWS[6][3] = 1;
@@ -65,7 +69,7 @@
 
     this.repaint();
 
-    window.setInterval(this.step.bind(this), 500);
+    window.setInterval(this.step.bind(this), 300);
   };
 
   Game.ROWS = [];
@@ -89,7 +93,7 @@
   Game.FRAME_ID = -1;
 
   Game.prototype.repaint = function() {
-    // console.log('repaint');
+    console.log('repaint');
     Game.FRAME_ID = requestAnimationFrame(this.repaint.bind(this));
 
     // console.log('Game.FRAME_ID', Game.FRAME_ID);
@@ -103,20 +107,23 @@
       for (var j = 0; j < row.length; j++) {
 
         var blockCode = row[j];
-        if (blockCode == 0 &&
+        if (//blockCode == 0 &&
             Game.PIECE_COORDINATES.y >= i &&
             Game.PIECE_COORDINATES.y <= i + Game.PIECE_SPRITE.length - 1 &&
             Game.PIECE_COORDINATES.x >= j &&
             Game.PIECE_COORDINATES.x <= j + Game.PIECE_SPRITE[0].length - 1) {
 
-          var pieceY = Game.PIECE_COORDINATES.y - i;
-          var pieceX = Game.PIECE_COORDINATES.x - j;
-          // console.log('piece X Y ', pieceY, pieceX);
+          var pieceY = Math.abs(i - Game.PIECE_COORDINATES.y);
+          var pieceX = Math.abs(j - Game.PIECE_COORDINATES.x);
+          console.log('i j', i, j);
+          console.log('piece X Y ', pieceY, pieceX);
           var pieceCode = Game.PIECE_SPRITE[pieceY][pieceX];
           if (pieceCode != 0) {
             blockCode = pieceCode;
           }
         }
+
+        // 6, 1 -> [1][2]
 
         var cor;
         switch (blockCode) {
