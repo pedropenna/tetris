@@ -74,7 +74,37 @@
 
   Game.ROWS = [];
 
-  Game.prototype.checkIfPieceCollided = function() {
+  Game.prototype.checkIfPieceWillCollide = function() {
+    var nextY = Game.PIECE_COORDINATES.y + 1;
+
+    var collided = false;
+    for (var i = 0; i < Game.PIECE_SPRITE.length && !collided; i++) {
+      for (var j = 0; j < Game.PIECE_SPRITE[0].length; j++) {
+        if (Game.PIECE_SPRITE[i][j] != 0) {
+          if ((i + nextY > Game.ROWS.length) ||
+              (Game.ROWS[i + nextY][Game.PIECE_COORDINATES.x + j] != 0)) {
+            collided = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (collided) {
+      console.log('collided!');
+      for (var k = 0; k < Game.PIECE_SPRITE.length; k++) {
+        for (var m = 0; m < Game.PIECE_SPRITE[0].length; m++) {
+          var spriteBlockCode = Game.PIECE_SPRITE[k][m];
+          if (spriteBlockCode != 0) {
+            Game.ROWS[k + Game.PIECE_COORDINATES.y]
+                      [Game.PIECE_COORDINATES.x + m] = spriteBlockCode;
+          }
+        }
+      }
+
+      Game.PIECE_COORDINATES = {x: 4, y: -1};
+    }
+
     // if piece collided
     //   solidify it
     //   clear all complete lines
@@ -93,7 +123,7 @@
   Game.FRAME_ID = -1;
 
   Game.prototype.repaint = function() {
-    console.log('repaint');
+    // console.log('repaint');
     Game.FRAME_ID = requestAnimationFrame(this.repaint.bind(this));
 
     // console.log('Game.FRAME_ID', Game.FRAME_ID);
@@ -115,8 +145,8 @@
 
           var pieceY = Math.abs(Game.PIECE_COORDINATES.y - i);
           var pieceX = Math.abs(j - Game.PIECE_COORDINATES.x);
-          console.log('i j', i, j);
-          console.log('piece X Y ', pieceY, pieceX);
+          // console.log('i j', i, j);
+          // console.log('piece X Y ', pieceY, pieceX);
           var pieceCode = Game.PIECE_SPRITE[pieceY][pieceX];
           if (pieceCode != 0) {
             blockCode = pieceCode;
@@ -159,29 +189,12 @@
 
     }
 
-    // var cor = 'rgb(' + Math.ceil(254 * Math.random()) +
-    //         ',' + Math.ceil(254 * Math.random()) +
-    //         ',' + Math.ceil(254 * Math.random()) + ')';
-    // console.log('cor', cor);
-    // this.ctx.strokeStyle  = cor;
-    // this.ctx.fillStyle  = cor;
-    // this.ctx.beginPath();
-    // this.ctx.rect(800 * Math.random(),
-    //          599 * Math.random(),
-    //          70 * Math.random(),
-    //          80 * Math.random());
-    // this.ctx.fillRect(799 * Math.random(),
-    //         599 * Math.random(),
-    //         70 * Math.random(),
-    //         80 * Math.random());
-    // this.ctx.stroke();
-
   };
 
   Game.prototype.step = function() {
     console.log('step');
 
-    this.checkIfPieceCollided();
+    this.checkIfPieceWillCollide();
     this.movePiece();
 
   };
