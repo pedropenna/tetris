@@ -59,16 +59,6 @@
     this.spawnNewPiece();
     Game.PIECE_COORDINATES = {x: 4, y: 0};
 
-    Game.ROWS[19][0] = 1;
-    Game.ROWS[19][1] = 1;
-    Game.ROWS[19][2] = 1;
-    Game.ROWS[19][3] = 1;
-    Game.ROWS[19][4] = 1;
-    Game.ROWS[19][5] = 1;
-    Game.ROWS[19][7] = 1;
-    Game.ROWS[19][8] = 1;
-    Game.ROWS[19][9] = 1;
-
     this.repaint();
 
     Game.INTERVAL_ID = window.setInterval(this.step.bind(this), 300);
@@ -111,6 +101,15 @@
           }
           break;
         case 32: /* space */
+          var lowestPoint = Game.PIECE_COORDINATES.y;
+          for (var i = Game.ROWS.length - 1;
+                    i > Game.PIECE_COORDINATES.y; i--) {
+            if (!self.checkCollision(Game.PIECE_COORDINATES.x, i)) {
+              lowestPoint = i;
+              break;
+            }
+          }
+          Game.PIECE_COORDINATES.y = i;
           break;
       }
     };
@@ -187,6 +186,16 @@
 
     Game.PIECE_COORDINATES = {x: 4, y: -1};
 
+    if (this.checkCollision(Game.PIECE_COORDINATES.x, 0)) {
+      this.endGame();
+      Game.PIECE_SPRITE = [0];
+    }
+  };
+
+  Game.prototype.endGame = function() {
+    console.log('endGame');
+    window.clearInterval(Game.INTERVAL_ID);
+    window.alert('Game Over');
   };
 
   Game.prototype.solidifyPiece = function() {
