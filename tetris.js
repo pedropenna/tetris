@@ -63,7 +63,7 @@
     Game.ROWS[7][2] = 1;
     Game.ROWS[6][3] = 1;
     Game.ROWS[6][4] = 1;
-    Game.ROWS[0][2] = 2;
+    Game.ROWS[14][2] = 2;
     Game.ROWS[2][0] = 3;
     Game.ROWS[11][6] = 4;
 
@@ -108,12 +108,12 @@
 
         var blockCode = row[j];
         if (//blockCode == 0 &&
-            Game.PIECE_COORDINATES.y >= i &&
-            Game.PIECE_COORDINATES.y <= i + Game.PIECE_SPRITE.length - 1 &&
-            Game.PIECE_COORDINATES.x >= j &&
-            Game.PIECE_COORDINATES.x <= j + Game.PIECE_SPRITE[0].length - 1) {
+            i >= Game.PIECE_COORDINATES.y &&
+            i <= Game.PIECE_COORDINATES.y + Game.PIECE_SPRITE.length - 1 &&
+            j >= Game.PIECE_COORDINATES.x &&
+            j <= Game.PIECE_COORDINATES.x + Game.PIECE_SPRITE[0].length - 1) {
 
-          var pieceY = Math.abs(i - Game.PIECE_COORDINATES.y);
+          var pieceY = Math.abs(Game.PIECE_COORDINATES.y - i);
           var pieceX = Math.abs(j - Game.PIECE_COORDINATES.x);
           console.log('i j', i, j);
           console.log('piece X Y ', pieceY, pieceX);
