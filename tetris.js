@@ -56,20 +56,8 @@
       Game.ROWS.push(row);
     }
 
-    // Game.PIECE_SPRITE = [[5, 0],
-    //                      [5, 5],
-    //                      [0, 5]];
-
-    Game.PIECE_SPRITE = [[0, 5, 0],
-                         [5, 5, 5]];
-
-    Game.ROWS[7][3] = 1;
-    Game.ROWS[7][2] = 1;
-    Game.ROWS[6][3] = 1;
-    Game.ROWS[6][4] = 1;
-    Game.ROWS[14][2] = 2;
-    Game.ROWS[2][0] = 3;
-    Game.ROWS[11][6] = 4;
+    this.spawnNewPiece();
+    Game.PIECE_COORDINATES = {x: 4, y: 0};
 
     this.repaint();
 
@@ -156,7 +144,7 @@
   };
 
   Game.prototype.spawnNewPiece = function() {
-    var randomNumber = parseInt(Math.random() * 5);
+    var randomNumber = parseInt(Math.random() * 7);
     switch (randomNumber) {
     case 0:
       Game.PIECE_SPRITE = [[1, 1],
@@ -178,6 +166,19 @@
     case 4:
       Game.PIECE_SPRITE = [[0, 5, 0],
                            [5, 5, 5]];
+      break;
+    case 5:
+      Game.PIECE_SPRITE = [[6, 6],
+                           [6, 0],
+                           [6, 0]];
+      break;
+    case 6:
+      Game.PIECE_SPRITE = [[7, 7],
+                           [0, 7],
+                           [0, 7]];
+      break;
+    default:
+      alert('valor invalido: ' + randomNumber);
       break;
     }
 
@@ -221,7 +222,7 @@
   };
 
   Game.PIECE_SPRITE = [];
-  Game.PIECE_COORDINATES = {x: 4, y: 0};
+  Game.PIECE_COORDINATES = {};
 
   Game.prototype.movePiece = function() {
     Game.PIECE_COORDINATES.y++;
@@ -264,6 +265,9 @@
 
         var cor;
         switch (blockCode) {
+          case 0:
+            cor = 'white';
+            break;
           case 1:
             cor = 'red';
             break;
@@ -279,8 +283,14 @@
           case 5:
             cor = 'orange';
             break;
+          case 6:
+            cor = 'brown';
+            break;
+          case 7:
+            cor = 'green';
+            break;
           default:
-            cor = 'white';
+            alert('invalid color: ' + blockCode);
             break;
         }
 
