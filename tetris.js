@@ -44,6 +44,8 @@
   Game.prototype.initGame = function() {
     console.log('init game');
 
+    this.setupKeyListeners();
+
     for (var i = 1; i <= 20; i++) {
       var row = [];
       for (var j = 1; j <= 10; j++) {
@@ -72,6 +74,32 @@
     window.setInterval(this.step.bind(this), 300);
   };
 
+  Game.prototype.setupKeyListeners = function() {
+    document.onkeydown = function(event) {
+      console.log('key', event.keyCode);
+      switch (event.keyCode) {
+        case 65:
+        case 37:
+          Game.PIECE_COORDINATES.x--;
+          break;
+        case 39:
+        case 68:
+          Game.PIECE_COORDINATES.x++;
+          break;
+        case 38:
+        case 87:
+          Game.PIECE_COORDINATES.y--;
+          break;
+        case 40:
+        case 83:
+          Game.PIECE_COORDINATES.y++;
+          break;
+        case 32:
+          break;
+      }
+    };
+  };
+
   Game.ROWS = [];
 
   Game.prototype.checkIfPieceWillCollide = function() {
@@ -81,7 +109,7 @@
     for (var i = 0; i < Game.PIECE_SPRITE.length && !collided; i++) {
       for (var j = 0; j < Game.PIECE_SPRITE[0].length; j++) {
         if (Game.PIECE_SPRITE[i][j] != 0) {
-          if ((i + nextY > Game.ROWS.length) ||
+          if ((i + nextY > Game.ROWS.length - 1) ||
               (Game.ROWS[i + nextY][Game.PIECE_COORDINATES.x + j] != 0)) {
             collided = true;
             break;
@@ -159,22 +187,22 @@
         switch (blockCode) {
           case 1:
             cor = 'red';
-          break;
+            break;
           case 2:
             cor = 'blue';
-          break;
+            break;
           case 3:
             cor = 'yellow';
-          break;
+            break;
           case 4:
             cor = 'purple';
-          break;
+            break;
           case 5:
             cor = 'orange';
-          break;
+            break;
           default:
             cor = 'white';
-          break;
+            break;
         }
 
         // this.ctx.beginPath();
