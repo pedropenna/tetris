@@ -41,6 +41,8 @@
     }
   };
 
+  Game.INTERVAL_ID = 0;
+
   Game.prototype.initGame = function() {
     console.log('init game');
 
@@ -71,33 +73,62 @@
 
     this.repaint();
 
-    window.setInterval(this.step.bind(this), 300);
+    Game.INTERVAL_ID = window.setInterval(this.step.bind(this), 300);
   };
 
   Game.prototype.setupKeyListeners = function() {
+    var self = this;
+
     document.onkeydown = function(event) {
-      console.log('key', event.keyCode);
+      // console.log('key', event.keyCode);
+
       switch (event.keyCode) {
-        case 65:
-        case 37:
-          Game.PIECE_COORDINATES.x--;
+        case 37: /* left */
+        case 65: /* a */
+          if (!self.checkCollision(Game.PIECE_COORDINATES.x - 1,
+                                   Game.PIECE_COORDINATES.y)) {
+            Game.PIECE_COORDINATES.x--;
+          }
           break;
-        case 39:
-        case 68:
-          Game.PIECE_COORDINATES.x++;
+        case 39: /* right */
+        case 68: /* d */
+          if (!self.checkCollision(Game.PIECE_COORDINATES.x + 1,
+                                   Game.PIECE_COORDINATES.y)) {
+            Game.PIECE_COORDINATES.x++;
+          }
           break;
-        case 38:
-        case 87:
-          Game.PIECE_COORDINATES.y--;
+        case 38: /* up */
+        case 87: /* w */
+          var rotatedPiece = self.rotatePiece();
+          if (!self.checkCollision(Game.PIECE_COORDINATES.x,
+                                   Game.PIECE_COORDINATES.y,
+                                   rotatedPiece)) {
+            Game.PIECE_SPRITE = rotatedPiece;
+          }
           break;
-        case 40:
-        case 83:
-          Game.PIECE_COORDINATES.y++;
+        case 83: /* down */
+        case 40: /* s */
+          if (!self.checkIfPieceWillCollide()) {
+            Game.PIECE_COORDINATES.y++;
+          }
           break;
-        case 32:
+        case 32: /* space */
           break;
       }
     };
+  };
+
+  Game.prototype.rotatePiece = function() {
+    var newSprite = [];
+    for (var j = 0; j < Game.PIECE_SPRITE[0].length; j++) {
+      var newRow = [];
+      newSprite.push(newRow);
+      for (var i = Game.PIECE_SPRITE.length - 1; i >= 0; i--) {
+        newRow.push(Game.PIECE_SPRITE[i][j]);
+      }
+    }
+
+    return newSprite;
   };
 
   Game.ROWS = [];
@@ -105,32 +136,15 @@
   Game.prototype.checkIfPieceWillCollide = function() {
     var nextY = Game.PIECE_COORDINATES.y + 1;
 
-    var collided = false;
-    for (var i = 0; i < Game.PIECE_SPRITE.length && !collided; i++) {
-      for (var j = 0; j < Game.PIECE_SPRITE[0].length; j++) {
-        if (Game.PIECE_SPRITE[i][j] != 0) {
-          if ((i + nextY > Game.ROWS.length - 1) ||
-              (Game.ROWS[i + nextY][Game.PIECE_COORDINATES.x + j] != 0)) {
-            collided = true;
-            break;
-          }
-        }
-      }
-    }
+    var collided = this.checkCollision(Game.PIECE_COORDINATES.x,
+                                       Game.PIECE_COORDINATES.y + 1);
 
     if (collided) {
       console.log('collided!');
-      for (var k = 0; k < Game.PIECE_SPRITE.length; k++) {
-        for (var m = 0; m < Game.PIECE_SPRITE[0].length; m++) {
-          var spriteBlockCode = Game.PIECE_SPRITE[k][m];
-          if (spriteBlockCode != 0) {
-            Game.ROWS[k + Game.PIECE_COORDINATES.y]
-                      [Game.PIECE_COORDINATES.x + m] = spriteBlockCode;
-          }
-        }
-      }
 
-      Game.PIECE_COORDINATES = {x: 4, y: -1};
+      this.solidifyPiece();
+
+      this.spawnNewPiece();
     }
 
     // if piece collided
@@ -139,6 +153,71 @@
     //   create an equal ammount of lines on top of the grid
     //   create new piece
     //   spawn the new piece
+  };
+
+  Game.prototype.spawnNewPiece = function() {
+    var randomNumber = parseInt(Math.random() * 5);
+    switch (randomNumber) {
+    case 0:
+      Game.PIECE_SPRITE = [[1, 1],
+                           [1, 1]];
+      break;
+    case 1:
+      Game.PIECE_SPRITE = [[2, 2, 2, 2]];
+      break;
+    case 2:
+      Game.PIECE_SPRITE = [[0, 3],
+                           [3, 3],
+                           [3, 0]];
+      break;
+    case 3:
+      Game.PIECE_SPRITE = [[4, 0],
+                           [4, 4],
+                           [0, 4]];
+      break;
+    case 4:
+      Game.PIECE_SPRITE = [[0, 5, 0],
+                           [5, 5, 5]];
+      break;
+    }
+
+    Game.PIECE_COORDINATES = {x: 4, y: -1};
+
+  };
+
+  Game.prototype.solidifyPiece = function() {
+    for (var k = 0; k < Game.PIECE_SPRITE.length; k++) {
+      for (var m = 0; m < Game.PIECE_SPRITE[0].length; m++) {
+        var spriteBlockCode = Game.PIECE_SPRITE[k][m];
+        if (spriteBlockCode != 0) {
+          Game.ROWS[k + Game.PIECE_COORDINATES.y]
+                    [Game.PIECE_COORDINATES.x + m] = spriteBlockCode;
+        }
+      }
+    }
+  };
+
+  Game.prototype.checkCollision = function(x, y, piece) {
+    if (!piece) {
+      piece = Game.PIECE_SPRITE;
+    }
+
+    var collided = false;
+    for (var i = 0; i < piece.length && !collided; i++) {
+      for (var j = 0; j < piece[0].length; j++) {
+        if (piece[i][j] != 0) {
+          if ((i + y > Game.ROWS.length - 1) ||
+                (j + x < 0) ||
+                (j + x > Game.ROWS[0].length - 1) ||
+              (Game.ROWS[i + y][x + j] != 0)) {
+            collided = true;
+            break;
+          }
+        }
+      }
+    }
+
+    return collided;
   };
 
   Game.PIECE_SPRITE = [];
