@@ -147,43 +147,12 @@
   };
 
   Game.prototype.spawnNewPiece = function() {
-    var randomNumber = parseInt(Math.floor(Math.random() * 7));
-    switch (randomNumber) {
-    case 0:
-      Game.PIECE_SPRITE = [[1, 1],
-                           [1, 1]];
-      break;
-    case 1:
-      Game.PIECE_SPRITE = [[2, 2, 2, 2]];
-      break;
-    case 2:
-      Game.PIECE_SPRITE = [[0, 3],
-                           [3, 3],
-                           [3, 0]];
-      break;
-    case 3:
-      Game.PIECE_SPRITE = [[4, 0],
-                           [4, 4],
-                           [0, 4]];
-      break;
-    case 4:
-      Game.PIECE_SPRITE = [[0, 5, 0],
-                           [5, 5, 5]];
-      break;
-    case 5:
-      Game.PIECE_SPRITE = [[6, 6],
-                           [6, 0],
-                           [6, 0]];
-      break;
-    case 6:
-      Game.PIECE_SPRITE = [[7, 7],
-                           [0, 7],
-                           [0, 7]];
-      break;
-    default:
-      alert('valor invalido: ' + randomNumber);
-      break;
+    if (!Game.NEXT_PIECE) {
+      Game.PIECE_SPRITE = this.createNewPiece();
+    } else {
+      Game.PIECE_SPRITE = Game.NEXT_PIECE;
     }
+    Game.NEXT_PIECE = this.createNewPiece();
 
     Game.PIECE_COORDINATES = {x: 4, y: -1};
 
@@ -191,6 +160,50 @@
       this.endGame();
       Game.PIECE_SPRITE = [0];
     }
+  };
+
+  Game.prototype.createNewPiece = function() {
+    var newPiece;
+
+    var randomNumber = parseInt(Math.floor(Math.random() * 7));
+    switch (randomNumber) {
+      case 0:
+        newPiece = [[1, 1],
+                    [1, 1]];
+        break;
+      case 1:
+        newPiece = [[2, 2, 2, 2]];
+        break;
+      case 2:
+        newPiece = [[0, 3],
+                    [3, 3],
+                    [3, 0]];
+        break;
+      case 3:
+        newPiece = [[4, 0],
+                    [4, 4],
+                    [0, 4]];
+        break;
+      case 4:
+        newPiece = [[0, 5, 0],
+                    [5, 5, 5]];
+        break;
+      case 5:
+        newPiece = [[6, 6],
+                    [6, 0],
+                    [6, 0]];
+        break;
+      case 6:
+        newPiece = [[7, 7],
+                    [0, 7],
+                    [0, 7]];
+        break;
+      default:
+        alert('invalid piece number' + randomNumber);
+        break;
+    }
+
+    return newPiece;
   };
 
   Game.prototype.endGame = function() {
@@ -327,16 +340,28 @@
             break;
         }
 
-        // this.ctx.beginPath();
         this.ctx.strokeStyle  = cor;
         this.ctx.fillStyle  = cor;
         this.ctx.fillRect(leftBorderX + 1 + (j * Game.BLOCK_SIZE),
                       10 + 1 + (i * Game.BLOCK_SIZE),
                       28,
                       28);
-        // this.ctx.stroke();
       }
 
+    }
+
+    for (var n = 0; n < Game.PIECE_SPRITE.length; n++) {
+      for (var p = 0; p < Game.PIECE_SPRITE[0].length; p++) {
+
+        if (Game.PIECE_SPRITE[n][p] != 0) {
+          this.ctx.strokeStyle  = 'black';
+          this.ctx.fillStyle  = 'black';
+          this.ctx.fillRect(630 + (p * 30),
+                            250 + (n * 30),
+                            28,
+                            28);
+        }
+      }
     }
 
   };
