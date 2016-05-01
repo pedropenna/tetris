@@ -102,14 +102,15 @@
           break;
         case 32: /* space */
           var lowestPoint = Game.PIECE_COORDINATES.y;
-          for (var i = Game.ROWS.length - 1;
-                    i > Game.PIECE_COORDINATES.y; i--) {
-            if (!self.checkCollision(Game.PIECE_COORDINATES.x, i)) {
-              lowestPoint = i;
+          for (var i = Game.PIECE_COORDINATES.y;
+                    i < Game.ROWS.length; i++) {
+            if (self.checkCollision(Game.PIECE_COORDINATES.x, i)) {
               break;
+            } else {
+              lowestPoint = i;
             }
           }
-          Game.PIECE_COORDINATES.y = i;
+          Game.PIECE_COORDINATES.y = lowestPoint;
           break;
       }
     };
@@ -146,7 +147,7 @@
   };
 
   Game.prototype.spawnNewPiece = function() {
-    var randomNumber = parseInt(Math.random() * 7);
+    var randomNumber = parseInt(Math.floor(Math.random() * 7));
     switch (randomNumber) {
     case 0:
       Game.PIECE_SPRITE = [[1, 1],
