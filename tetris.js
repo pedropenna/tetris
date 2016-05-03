@@ -15,6 +15,10 @@
 
   Game.BLOCK_SIZE = 30;
 
+  Game.score = 0;
+
+  Game.linesCleared = 0;
+
   Game.prototype.drawGrid = function() {
     // console.log('draw grid');
     this.ctx.beginPath();
@@ -53,7 +57,7 @@
       for (var j = 1; j <= 10; j++) {
         row.push(0);
       }
-      Game.ROWS.push(row);
+      Game.rows.push(row);
     }
 
     this.spawnNewPiece();
@@ -61,7 +65,7 @@
 
     this.repaint();
 
-    Game.INTERVAL_ID = window.setInterval(this.step.bind(this), 300);
+    Game.INTERVAL_ID = window.setInterval(this.step.bind(this), 1000);
   };
 
   Game.prototype.setupKeyListeners = function() {
@@ -103,7 +107,7 @@
         case 32: /* space */
           var lowestPoint = Game.PIECE_COORDINATES.y;
           for (var i = Game.PIECE_COORDINATES.y;
-                    i < Game.ROWS.length; i++) {
+                    i < Game.rows.length; i++) {
             if (self.checkCollision(Game.PIECE_COORDINATES.x, i)) {
               break;
             } else {
@@ -129,7 +133,7 @@
     return newSprite;
   };
 
-  Game.ROWS = [];
+  Game.rows = [];
 
   Game.prototype.checkIfPieceWillCollide = function() {
     var nextY = Game.PIECE_COORDINATES.y + 1;
@@ -217,7 +221,7 @@
       for (var m = 0; m < Game.PIECE_SPRITE[0].length; m++) {
         var spriteBlockCode = Game.PIECE_SPRITE[k][m];
         if (spriteBlockCode != 0) {
-          Game.ROWS[k + Game.PIECE_COORDINATES.y]
+          Game.rows[k + Game.PIECE_COORDINATES.y]
                     [Game.PIECE_COORDINATES.x + m] = spriteBlockCode;
         }
       }
@@ -228,8 +232,8 @@
 
   Game.prototype.clearCompleteRows = function() {
     var completeRows = [];
-    for (var i = 0; i < Game.ROWS.length; i++) {
-      var row = Game.ROWS[i];
+    for (var i = 0; i < Game.rows.length; i++) {
+      var row = Game.rows[i];
 
       var complete = true;
       for (var j = 0; j < row.length; j++) {
@@ -244,8 +248,17 @@
     }
 
     for (var k = 0; k < completeRows.length; k++) {
-      Game.ROWS.splice(completeRows[k], 1);
-      Game.ROWS.unshift([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      Game.rows.splice(completeRows[k], 1);
+      Game.rows.unshift([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      Game.score += 100;
+      Game.linesCleared++;
+
+      if (Game.linesCleared % 10 == 0) {
+        window.clearInterval(Game.INTERVAL_ID);
+        var newFrequency = Math.abs(1000 - (80 * (Game.linesCleared / 10)));
+        Game.INTERVAL_ID = window.setInterval(this.step.bind(this),
+                                              newFrequency);
+      }
     }
   };
 
@@ -258,10 +271,10 @@
     for (var i = 0; i < piece.length && !collided; i++) {
       for (var j = 0; j < piece[0].length; j++) {
         if (piece[i][j] != 0) {
-          if ((i + y > Game.ROWS.length - 1) ||
+          if ((i + y > Game.rows.length - 1) ||
                 (j + x < 0) ||
-                (j + x > Game.ROWS[0].length - 1) ||
-              (Game.ROWS[i + y][x + j] != 0)) {
+                (j + x > Game.rows[0].length - 1) ||
+              (Game.rows[i + y][x + j] != 0)) {
             collided = true;
             break;
           }
@@ -289,8 +302,8 @@
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.drawGrid();
 
-    for (var i = 0; i < Game.ROWS.length; i++) {
-      var row = Game.ROWS[i];
+    for (var i = 0; i < Game.rows.length; i++) {
+      var row = Game.rows[i];
       for (var j = 0; j < row.length; j++) {
 
         var blockCode = row[j];
@@ -309,39 +322,10 @@
           }
         }
 
-        var cor;
-        switch (blockCode) {
-          case 0:
-            cor = 'white';
-            break;
-          case 1:
-            cor = 'red';
-            break;
-          case 2:
-            cor = 'blue';
-            break;
-          case 3:
-            cor = 'yellow';
-            break;
-          case 4:
-            cor = 'purple';
-            break;
-          case 5:
-            cor = 'orange';
-            break;
-          case 6:
-            cor = 'brown';
-            break;
-          case 7:
-            cor = 'green';
-            break;
-          default:
-            alert('invalid color: ' + blockCode);
-            break;
-        }
+        var color = this.decodeColor(blockCode);
 
-        this.ctx.strokeStyle  = cor;
-        this.ctx.fillStyle  = cor;
+        this.ctx.strokeStyle  = color;
+        this.ctx.fillStyle  = color;
         this.ctx.fillRect(leftBorderX + 1 + (j * Game.BLOCK_SIZE),
                       10 + 1 + (i * Game.BLOCK_SIZE),
                       28,
@@ -350,12 +334,14 @@
 
     }
 
-    for (var n = 0; n < Game.PIECE_SPRITE.length; n++) {
-      for (var p = 0; p < Game.PIECE_SPRITE[0].length; p++) {
+    /* Draw the next piece */
+    for (var n = 0; n < Game.NEXT_PIECE.length; n++) {
+      for (var p = 0; p < Game.NEXT_PIECE[0].length; p++) {
 
-        if (Game.PIECE_SPRITE[n][p] != 0) {
-          this.ctx.strokeStyle  = 'black';
-          this.ctx.fillStyle  = 'black';
+        var nextBlock = Game.NEXT_PIECE[n][p];
+        if (nextBlock != 0) {
+          var nextBlockColor = this.decodeColor(nextBlock);
+          this.ctx.strokeStyle = this.ctx.fillStyle = nextBlockColor;
           this.ctx.fillRect(630 + (p * 30),
                             250 + (n * 30),
                             28,
@@ -364,6 +350,46 @@
       }
     }
 
+    this.ctx.strokeStyle = 'rgb(100, 100, 100)';
+    this.ctx.fillStyle = 'rgb(100, 100, 100)';
+    this.ctx.font = '20px sans-serif';
+    this.ctx.fillText('Score: ' + Game.score, 20, 250);
+    this.ctx.fillText('Lines: ' + Game.linesCleared, 20, 320);
+  };
+
+  Game.prototype.decodeColor = function(code) {
+    var cor;
+    switch (code) {
+      case 0:
+        cor = 'white';
+        break;
+      case 1:
+        cor = 'red';
+        break;
+      case 2:
+        cor = 'blue';
+        break;
+      case 3:
+        cor = 'magenta';
+        break;
+      case 4:
+        cor = 'purple';
+        break;
+      case 5:
+        cor = 'orange';
+        break;
+      case 6:
+        cor = 'rgb(150, 150, 150)';
+        break;
+      case 7:
+        cor = 'green';
+        break;
+      default:
+        alert('invalid color: ' + blockCode);
+        break;
+    }
+
+    return cor;
   };
 
   Game.prototype.step = function() {
